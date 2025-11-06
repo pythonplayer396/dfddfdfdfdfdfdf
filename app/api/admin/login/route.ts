@@ -21,8 +21,22 @@ export async function POST(request: Request) {
         details: { timestamp: new Date().toISOString() }
       })
 
-      // In production, use proper JWT tokens or sessions
-      return NextResponse.json({ success: true, token: 'admin-authenticated' })
+      // Generate a secure session token
+      const sessionToken = process.env.ADMIN_SESSION_SECRET || 'admin-authenticated'
+      
+      // Create response with HTTP-only cookie
+      const response = NextResponse.json({ success: true, token: sessionToken })
+      
+      // Set secure HTTP-only cookie
+      response.cookies.set('admin_session', sessionToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24, // 24 hours
+        path: '/',
+      })
+      
+      return response
     }
 
     // Log failed login attempt

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import fs from 'fs/promises'
 import path from 'path'
 import { logAuditEvent } from '@/lib/auditLog'
@@ -18,7 +19,27 @@ async function writeDatabase(data: any) {
   await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2))
 }
 
+// Middleware to check admin authentication
+function checkAdminAuth() {
+  const cookieStore = cookies()
+  const adminSession = cookieStore.get('admin_session')?.value
+  const validToken = process.env.ADMIN_SESSION_SECRET || 'admin-authenticated'
+  
+  if (!adminSession || adminSession !== validToken) {
+    return false
+  }
+  return true
+}
+
 export async function GET(request: Request) {
+  // Check authentication
+  if (!checkAdminAuth()) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
   try {
     const db = await readDatabase()
     return NextResponse.json(db.applications)
@@ -31,6 +52,14 @@ export async function GET(request: Request) {
 }
 
 export async function PUT(request: Request) {
+  // Check authentication
+  if (!checkAdminAuth()) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
   try {
     const { id, status } = await request.json()
     const data = await fs.readFile(DB_PATH, 'utf8')
@@ -65,6 +94,14 @@ export async function PUT(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  // Check authentication
+  if (!checkAdminAuth()) {
+    return NextResponse.json(
+      { error: 'Unauthorized' },
+      { status: 401 }
+    )
+  }
+
   try {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')
