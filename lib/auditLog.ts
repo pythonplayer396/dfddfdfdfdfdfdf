@@ -1,4 +1,3 @@
-import { getStore } from '@netlify/blobs'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface AuditLogEntry {
@@ -13,19 +12,61 @@ export interface AuditLogEntry {
   userAgent?: string
 }
 
+const GIST_ID = process.env.GIST_AUDIT_ID || process.env.GIST_ID || 'temp'
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
+
 async function readAuditLogs() {
-  try {
-    const store = getStore('audit-logs')
-    const data = await store.get('all', { type: 'json' })
-    return data || { logs: [] }
-  } catch {
+  if (!GITHUB_TOKEN || !GIST_ID || GIST_ID === 'temp') {
     return { logs: [] }
   }
+  
+  try {
+    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json'
+      },
+      next: { revalidate: 0 }
+    })
+    
+    if (response.ok) {
+      const gist = await response.json()
+      const content = gist.files['audit-logs.json']?.content
+      if (content) {
+        return JSON.parse(content)
+      }
+    }
+  } catch (error) {
+    console.error('Error reading audit logs:', error)
+  }
+  
+  return { logs: [] }
 }
 
 async function writeAuditLogs(data: any) {
-  const store = getStore('audit-logs')
-  await store.setJSON('all', data)
+  if (!GITHUB_TOKEN || !GIST_ID || GIST_ID === 'temp') {
+    return
+  }
+  
+  try {
+    await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: {
+          'audit-logs.json': {
+            content: JSON.stringify(data, null, 2)
+          }
+        }
+      })
+    })
+  } catch (error) {
+    console.error('Error writing audit logs:', error)
+  }
 }
 
 export async function logAuditEvent(event: Omit<AuditLogEntry, 'id' | 'timestamp'>): Promise<void> {

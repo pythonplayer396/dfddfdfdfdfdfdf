@@ -1,22 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import { getStore } from '@netlify/blobs'
 import { logAuditEvent } from '@/lib/auditLog'
-
-async function readDatabase() {
-  try {
-    const store = getStore('applications')
-    const data = await store.get('all', { type: 'json' })
-    return data || { applications: [] }
-  } catch {
-    return { applications: [] }
-  }
-}
-
-async function writeDatabase(data: any) {
-  const store = getStore('applications')
-  await store.setJSON('all', data)
-}
+import { readDatabase, writeDatabase } from '@/lib/storage'
 
 // Middleware to check admin authentication
 function checkAdminAuth() {

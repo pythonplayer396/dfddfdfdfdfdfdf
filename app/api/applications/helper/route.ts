@@ -1,21 +1,6 @@
 import { NextResponse } from 'next/server'
-import { getStore } from '@netlify/blobs'
 import { v4 as uuidv4 } from 'uuid'
-
-async function readDatabase() {
-  try {
-    const store = getStore('applications')
-    const data = await store.get('all', { type: 'json' })
-    return data || { applications: [] }
-  } catch {
-    return { applications: [] }
-  }
-}
-
-async function writeDatabase(data: any) {
-  const store = getStore('applications')
-  await store.setJSON('all', data)
-}
+import { readDatabase, writeDatabase } from '@/lib/storage'
 
 export async function POST(request: Request) {
   try {
