@@ -42,11 +42,17 @@ export default function DeveloperApplicationPage() {
         }),
       })
 
+      const data = await response.json()
+      
       if (response.ok) {
         setSubmitted(true)
+      } else {
+        alert('Failed to submit application: ' + (data.error || 'Unknown error'))
+        console.error('Submission failed:', data)
       }
     } catch (error) {
       console.error('Error submitting application:', error)
+      alert('Error submitting application. Check console for details.')
     }
   }
 
