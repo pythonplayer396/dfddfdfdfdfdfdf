@@ -1,0 +1,71 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-gray-700;
+  }
+  
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-discord-dark/50 backdrop-blur-lg border border-white/10 rounded-2xl p-6 shadow-xl;
+  }
+  
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 hover:bg-discord-dark/70 hover:border-discord-blurple/50 hover:shadow-2xl hover:scale-105;
+  }
+  
+  .btn-primary {
+    @apply bg-discord-blurple hover:bg-discord-blurple/80 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-discord-blurple/50;
+  }
+  
+  .btn-secondary {
+    @apply bg-discord-dark hover:bg-discord-dark/80 text-white font-semibold py-3 px-6 rounded-lg border border-discord-blurple/30 transition-all duration-300 hover:border-discord-blurple hover:scale-105;
+  }
+  
+  .input-field {
+    @apply w-full bg-discord-darker border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-400 focus:outline-none focus:border-discord-blurple focus:ring-2 focus:ring-discord-blurple/50 transition-all duration-300;
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-discord-blurple via-discord-fuchsia to-discord-green bg-clip-text text-transparent;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111214;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #5865f2;
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4752c4;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
