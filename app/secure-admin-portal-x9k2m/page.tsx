@@ -23,6 +23,8 @@ export default function AdminDashboard() {
   const [selectedApp, setSelectedApp] = useState<Application | null>(null)
   const [activeTab, setActiveTab] = useState<'all' | 'pending' | 'interview' | 'approved' | 'denied' | 'interview_failed'>('all')
   const [loginError, setLoginError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState('')
 
   useEffect(() => {
     // Check if already authenticated
@@ -90,20 +92,58 @@ export default function AdminDashboard() {
     setPassword('')
   }
 
+  const showSuccess = (message: string) => {
+    setSuccessMessage(message)
+    setTimeout(() => setSuccessMessage(''), 3000)
+  }
+
   const updateStatus = async (id: string, status: string) => {
-    await fetch('/api/admin/applications', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status }),
-    })
-    fetchApplications()
+    setLoading(true)
+    try {
+      const response = await fetch('/api/admin/applications', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status }),
+        credentials: 'include',
+      })
+      
+      if (response.ok) {
+        // Update locally for instant feedback
+        setApplications(prev => prev.map(app => 
+          app.id === id ? { ...app, status: status as Application['status'] } : app
+        ))
+        if (selectedApp?.id === id) {
+          setSelectedApp({ ...selectedApp, status: status as Application['status'] })
+        }
+        showSuccess(`Status updated to ${status}`)
+      }
+    } catch (error) {
+      console.error('Error updating status:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const deleteApplication = async (id: string) => {
     if (!confirm('Delete this application?')) return
-    await fetch(`/api/admin/applications?id=${id}`, { method: 'DELETE' })
-    fetchApplications()
-    setSelectedApp(null)
+    setLoading(true)
+    try {
+      const response = await fetch(`/api/admin/applications?id=${id}`, { 
+        method: 'DELETE',
+        credentials: 'include',
+      })
+      
+      if (response.ok) {
+        // Remove locally for instant feedback
+        setApplications(prev => prev.filter(app => app.id !== id))
+        setSelectedApp(null)
+        showSuccess('Application deleted')
+      }
+    } catch (error) {
+      console.error('Error deleting application:', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const exportToJSON = () => {
@@ -181,6 +221,23 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen pt-32 pb-20 px-4">
       <div className="max-w-7xl mx-auto">
+        {/* Success Message */}
+        {successMessage && (
+          <div className="fixed top-24 right-4 z-50 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg animate-slide-up">
+            ✓ {successMessage}
+          </div>
+        )}
+
+        {/* Loading Overlay */}
+        {loading && (
+          <div className="fixed inset-0 bg-black/50 z-40 flex items-center justify-center">
+            <div className="bg-discord-dark border border-discord-blurple rounded-lg p-6">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-discord-blurple mx-auto"></div>
+              <p className="text-white mt-4">Processing...</p>
+            </div>
+          </div>
+        )}
+
         <div className="flex items-center justify-between mb-8">
           <div className="flex items-center gap-4">
             <Shield className="w-12 h-12 text-discord-blurple" />
@@ -308,14 +365,16 @@ export default function AdminDashboard() {
                   <>
                     <button
                       onClick={() => updateStatus(selectedApp.id, 'interview')}
-                      className="btn-primary w-full flex items-center justify-center gap-2"
+                      disabled={loading}
+                      className="btn-primary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <CheckCircle className="w-5 h-5" />
                       Move to Interview
                     </button>
                     <button
                       onClick={() => updateStatus(selectedApp.id, 'denied')}
-                      className="bg-red-500 hover:bg-red-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors"
+                      disabled={loading}
+                      className="bg-red-500 hover:bg-red-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <XCircle className="w-5 h-5" />
                       Deny Application
@@ -326,14 +385,16 @@ export default function AdminDashboard() {
                   <>
                     <button
                       onClick={() => updateStatus(selectedApp.id, 'approved')}
-                      className="bg-green-500 hover:bg-green-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors"
+                      disabled={loading}
+                      className="bg-green-500 hover:bg-green-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <CheckCircle className="w-5 h-5" />
                       Approve (Interview Passed)
                     </button>
                     <button
                       onClick={() => updateStatus(selectedApp.id, 'interview_failed')}
-                      className="bg-orange-500 hover:bg-orange-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors"
+                      disabled={loading}
+                      className="bg-orange-500 hover:bg-orange-600 w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <XCircle className="w-5 h-5" />
                       Interview Failed
@@ -345,7 +406,8 @@ export default function AdminDashboard() {
                 )}
                 <button
                   onClick={() => deleteApplication(selectedApp.id)}
-                  className="btn-secondary w-full flex items-center justify-center gap-2"
+                  disabled={loading}
+                  className="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Trash2 className="w-5 h-5" />
                   Delete Application
