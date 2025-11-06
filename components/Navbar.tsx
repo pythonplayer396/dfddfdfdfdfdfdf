@@ -20,10 +20,10 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/dashboard" className="flex items-center space-x-2 group">
             <div className="w-10 h-10 bg-gradient-to-br from-discord-blurple to-discord-fuchsia rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-              <span className="text-white font-bold text-xl">FX</span>
+              <span className="text-white font-bold text-xl">FxG</span>
             </div>
             <span className="text-xl font-bold hidden sm:block gradient-text">
-              FakePixel X
+              FxG
             </span>
           </Link>
 
