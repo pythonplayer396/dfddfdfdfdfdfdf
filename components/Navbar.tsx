@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Menu, X, User } from 'lucide-react'
+import { Menu, X, User, FileText } from 'lucide-react'
 import { useState } from 'react'
 import { useSession } from 'next-auth/react'
 
@@ -11,6 +11,7 @@ export default function Navbar() {
 
   const navLinks = session ? [
     { href: '/dashboard/profile', label: 'Profile', icon: <User className="w-4 h-4" /> },
+    { href: '/dashboard/status', label: 'My Applications', icon: <FileText className="w-4 h-4" /> },
   ] : []
 
   return (
