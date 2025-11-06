@@ -28,7 +28,7 @@ export default function AdminLoginPage() {
       
       if (data.success) {
         setAdminToken(data.token)
-        router.push('/admin/dashboard')
+        router.push('/admin')
       } else {
         setLoginError('Invalid username or password')
       }
