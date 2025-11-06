@@ -5,18 +5,23 @@ import { getToken } from 'next-auth/jwt'
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname
 
-  // Protect admin routes
+  // Protect admin routes (except the main login page)
   if (path.startsWith('/secure-admin-portal-x9k2m')) {
-    // Check for admin session cookie
+    // Allow access to the main admin page (which has the login form)
+    if (path === '/secure-admin-portal-x9k2m') {
+      return NextResponse.next()
+    }
+    
+    // Check for admin session cookie for sub-pages
     const adminToken = request.cookies.get('admin_session')?.value
     
-    // If no admin token and not on login page, redirect to login
-    if (!adminToken && !path.includes('/auth/login')) {
+    // If no admin token, redirect to login
+    if (!adminToken) {
       return NextResponse.redirect(new URL('/secure-admin-portal-x9k2m', request.url))
     }
     
     // Verify admin token is valid
-    if (adminToken && adminToken !== process.env.ADMIN_SESSION_SECRET) {
+    if (adminToken !== process.env.ADMIN_SESSION_SECRET) {
       // Invalid token - clear it and redirect to login
       const response = NextResponse.redirect(new URL('/secure-admin-portal-x9k2m', request.url))
       response.cookies.delete('admin_session')
