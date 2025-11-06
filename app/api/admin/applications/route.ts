@@ -41,8 +41,11 @@ export async function GET(request: Request) {
 
   try {
     const db = await readDatabase()
-    return NextResponse.json(db.applications)
+    console.log('Admin fetching applications, count:', db.applications?.length || 0)
+    console.log('Applications data:', db.applications)
+    return NextResponse.json(db.applications || [])
   } catch (error) {
+    console.error('Error fetching applications for admin:', error)
     return NextResponse.json(
       { error: 'Failed to fetch applications' },
       { status: 500 }
