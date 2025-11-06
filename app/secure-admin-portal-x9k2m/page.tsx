@@ -37,9 +37,26 @@ export default function AdminDashboard() {
   }, [isAuthenticated])
 
   const fetchApplications = async () => {
-    const response = await fetch('/api/admin/applications')
-    const data = await response.json()
-    setApplications(data)
+    try {
+      const response = await fetch('/api/admin/applications', {
+        credentials: 'include', // Important: include cookies
+      })
+      
+      if (!response.ok) {
+        console.error('Failed to fetch applications:', response.status)
+        if (response.status === 401) {
+          // Session expired, logout
+          handleLogout()
+        }
+        return
+      }
+      
+      const data = await response.json()
+      setApplications(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Error fetching applications:', error)
+      setApplications([])
+    }
   }
 
   const handleLogin = async (e: React.FormEvent) => {
