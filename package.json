@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@netlify/blobs": "^10.3.3",
     "@types/uuid": "^11.0.0",
     "framer-motion": "^10.16.16",
     "lucide-react": "^0.294.0",

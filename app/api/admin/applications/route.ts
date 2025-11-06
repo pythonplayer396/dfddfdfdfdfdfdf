@@ -1,22 +1,21 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
-import fs from 'fs/promises'
-import path from 'path'
+import { getStore } from '@netlify/blobs'
 import { logAuditEvent } from '@/lib/auditLog'
-
-const DB_PATH = path.join(process.cwd(), 'data', 'applications.json')
 
 async function readDatabase() {
   try {
-    const data = await fs.readFile(DB_PATH, 'utf-8')
-    return JSON.parse(data)
+    const store = getStore('applications')
+    const data = await store.get('all', { type: 'json' })
+    return data || { applications: [] }
   } catch {
     return { applications: [] }
   }
 }
 
 async function writeDatabase(data: any) {
-  await fs.writeFile(DB_PATH, JSON.stringify(data, null, 2))
+  const store = getStore('applications')
+  await store.setJSON('all', data)
 }
 
 // Middleware to check admin authentication
@@ -62,15 +61,14 @@ export async function PUT(request: Request) {
 
   try {
     const { id, status } = await request.json()
-    const data = await fs.readFile(DB_PATH, 'utf8')
-    const db = JSON.parse(data)
+    const db = await readDatabase()
     
     const appIndex = db.applications.findIndex((app: any) => app.id === id)
     if (appIndex !== -1) {
       const oldStatus = db.applications[appIndex].status
       db.applications[appIndex].status = status
       db.applications[appIndex].updatedAt = new Date().toISOString()
-      await fs.writeFile(DB_PATH, JSON.stringify(db, null, 2))
+      await writeDatabase(db)
       
       // Log status change
       await logAuditEvent({

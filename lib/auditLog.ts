@@ -1,8 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
+import { getStore } from '@netlify/blobs'
 import { v4 as uuidv4 } from 'uuid'
-
-const AUDIT_LOG_PATH = path.join(process.cwd(), 'data', 'audit-logs.json')
 
 export interface AuditLogEntry {
   id: string
@@ -16,22 +13,24 @@ export interface AuditLogEntry {
   userAgent?: string
 }
 
-async function ensureAuditLogFile() {
+async function readAuditLogs() {
   try {
-    await fs.access(AUDIT_LOG_PATH)
+    const store = getStore('audit-logs')
+    const data = await store.get('all', { type: 'json' })
+    return data || { logs: [] }
   } catch {
-    const dataDir = path.join(process.cwd(), 'data')
-    await fs.mkdir(dataDir, { recursive: true })
-    await fs.writeFile(AUDIT_LOG_PATH, JSON.stringify({ logs: [] }, null, 2))
+    return { logs: [] }
   }
+}
+
+async function writeAuditLogs(data: any) {
+  const store = getStore('audit-logs')
+  await store.setJSON('all', data)
 }
 
 export async function logAuditEvent(event: Omit<AuditLogEntry, 'id' | 'timestamp'>): Promise<void> {
   try {
-    await ensureAuditLogFile()
-    
-    const data = await fs.readFile(AUDIT_LOG_PATH, 'utf-8')
-    const auditData = JSON.parse(data)
+    const auditData = await readAuditLogs()
     
     const logEntry: AuditLogEntry = {
       id: uuidv4(),
@@ -46,7 +45,7 @@ export async function logAuditEvent(event: Omit<AuditLogEntry, 'id' | 'timestamp
       auditData.logs = auditData.logs.slice(0, 1000)
     }
     
-    await fs.writeFile(AUDIT_LOG_PATH, JSON.stringify(auditData, null, 2))
+    await writeAuditLogs(auditData)
   } catch (error) {
     console.error('Failed to log audit event:', error)
   }
@@ -54,9 +53,7 @@ export async function logAuditEvent(event: Omit<AuditLogEntry, 'id' | 'timestamp
 
 export async function getAuditLogs(limit: number = 100): Promise<AuditLogEntry[]> {
   try {
-    await ensureAuditLogFile()
-    const data = await fs.readFile(AUDIT_LOG_PATH, 'utf-8')
-    const auditData = JSON.parse(data)
+    const auditData = await readAuditLogs()
     return auditData.logs.slice(0, limit)
   } catch (error) {
     console.error('Failed to read audit logs:', error)
