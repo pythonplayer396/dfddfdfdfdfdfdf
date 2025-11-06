@@ -348,7 +348,16 @@ export default function AdminDashboard() {
 
           {selectedApp && (
             <div className="glass-card sticky top-24">
-              <h2 className="text-2xl font-bold mb-4">Application Details</h2>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold">Application Details</h2>
+                <button
+                  onClick={() => setSelectedApp(null)}
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Close"
+                >
+                  <XCircle className="w-6 h-6" />
+                </button>
+              </div>
               <div className="space-y-3 mb-6">
                 {Object.entries(selectedApp).map(([key, value]) => {
                   if (['id', 'status', 'submittedAt', 'updatedAt'].includes(key)) return null
