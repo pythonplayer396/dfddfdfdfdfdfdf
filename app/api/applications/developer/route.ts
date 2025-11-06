@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
-import { readDatabase, writeDatabase } from '@/lib/storage'
+import { addApplication } from '@/lib/storage'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    console.log('Received application data:', body)
-    
-    const db = await readDatabase()
-    
-    console.log('Current database state:', db)
+    console.log('Received developer application:', body)
     
     const application = {
       id: uuidv4(),
@@ -20,19 +16,13 @@ export async function POST(request: Request) {
       updatedAt: new Date().toISOString(),
     }
     
-    console.log('New application:', application)
+    await addApplication(application)
     
-    db.applications.push(application)
-    
-    console.log('Database after push:', db)
-    
-    await writeDatabase(db)
-    
-    console.log('Application saved successfully')
+    console.log('Developer application saved successfully')
     
     return NextResponse.json({ success: true, id: application.id })
   } catch (error) {
-    console.error('Error saving application:', error)
+    console.error('Error saving developer application:', error)
     return NextResponse.json(
       { success: false, error: error instanceof Error ? error.message : 'Failed to save application' },
       { status: 500 }

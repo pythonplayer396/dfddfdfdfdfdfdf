@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { logAuditEvent } from '@/lib/auditLog'
-import { readDatabase, writeDatabase } from '@/lib/storage'
+import { readDatabase, updateApplication, deleteApplication } from '@/lib/storage'
 
 // Middleware to check admin authentication
 function checkAdminAuth() {
@@ -51,12 +51,14 @@ export async function PUT(request: Request) {
     const { id, status } = await request.json()
     const db = await readDatabase()
     
-    const appIndex = db.applications.findIndex((app: any) => app.id === id)
-    if (appIndex !== -1) {
-      const oldStatus = db.applications[appIndex].status
-      db.applications[appIndex].status = status
-      db.applications[appIndex].updatedAt = new Date().toISOString()
-      await writeDatabase(db)
+    const app: any = db.applications.find((app: any) => app.id === id)
+    if (app) {
+      const oldStatus = app.status
+      
+      await updateApplication(id, {
+        status,
+        updatedAt: new Date().toISOString()
+      })
       
       // Log status change
       await logAuditEvent({
@@ -67,8 +69,8 @@ export async function PUT(request: Request) {
         details: {
           oldStatus,
           newStatus: status,
-          applicationType: db.applications[appIndex].type,
-          discordUsername: db.applications[appIndex].discordUsername
+          applicationType: (app as any).type,
+          discordUsername: (app as any).discordUsername
         }
       })
     }
@@ -100,10 +102,9 @@ export async function DELETE(request: Request) {
     }
     
     const db = await readDatabase()
-    const appToDelete = db.applications.find((app: any) => app.id === id)
-    db.applications = db.applications.filter((app: any) => app.id !== id)
+    const appToDelete: any = db.applications.find((app: any) => app.id === id)
     
-    await writeDatabase(db)
+    await deleteApplication(id)
     
     // Log deletion
     if (appToDelete) {

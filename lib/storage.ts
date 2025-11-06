@@ -1,72 +1,83 @@
-const GIST_ID = process.env.GIST_ID || 'temp'
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || ''
+import clientPromise from './mongodb'
 
 export async function readDatabase() {
-  if (!GITHUB_TOKEN || !GIST_ID || GIST_ID === 'temp') {
-    console.log('No GitHub storage configured, returning empty')
-    return { applications: [] }
-  }
-  
   try {
-    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json'
-      },
-      next: { revalidate: 0 } // Don't cache
-    })
+    const client = await clientPromise
+    const db = client.db('fxg_applications')
+    const applications = await db.collection('applications').find({}).toArray()
     
-    if (!response.ok) {
-      console.error('Failed to read from GitHub:', response.status)
-      return { applications: [] }
-    }
+    console.log(`Read ${applications.length} applications from MongoDB`)
     
-    const gist = await response.json()
-    const content = gist.files['applications.json']?.content
-    
-    if (content) {
-      const data = JSON.parse(content)
-      console.log(`Read ${data.applications?.length || 0} applications from GitHub`)
-      return data
+    return { 
+      applications: applications.map(app => ({
+        ...app,
+        _id: app._id.toString() // Convert ObjectId to string
+      }))
     }
   } catch (error) {
-    console.error('Error reading database:', error)
+    console.error('Error reading from MongoDB:', error)
+    return { applications: [] }
   }
-  
-  return { applications: [] }
 }
 
 export async function writeDatabase(data: any) {
-  if (!GITHUB_TOKEN || !GIST_ID || GIST_ID === 'temp') {
-    console.log('No GitHub storage configured, data not persisted')
-    console.log('Data that would be saved:', JSON.stringify(data, null, 2))
-    return
-  }
-  
   try {
-    const response = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `token ${GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        files: {
-          'applications.json': {
-            content: JSON.stringify(data, null, 2)
-          }
-        }
-      })
-    })
+    const client = await clientPromise
+    const db = client.db('fxg_applications')
     
-    if (!response.ok) {
-      const errorText = await response.text()
-      console.error('Failed to write to GitHub:', response.status, errorText)
-    } else {
-      console.log(`Successfully wrote ${data.applications?.length || 0} applications to GitHub Gist`)
+    // Clear existing data and insert new
+    await db.collection('applications').deleteMany({})
+    
+    if (data.applications && data.applications.length > 0) {
+      await db.collection('applications').insertMany(data.applications)
+      console.log(`Successfully wrote ${data.applications.length} applications to MongoDB`)
     }
   } catch (error) {
-    console.error('Error writing database:', error)
+    console.error('Error writing to MongoDB:', error)
+  }
+}
+
+export async function addApplication(application: any) {
+  try {
+    const client = await clientPromise
+    const db = client.db('fxg_applications')
+    
+    const result = await db.collection('applications').insertOne(application)
+    console.log(`Added application with ID: ${result.insertedId}`)
+    
+    return result.insertedId.toString()
+  } catch (error) {
+    console.error('Error adding application to MongoDB:', error)
+    throw error
+  }
+}
+
+export async function updateApplication(id: string, updates: any) {
+  try {
+    const client = await clientPromise
+    const db = client.db('fxg_applications')
+    
+    await db.collection('applications').updateOne(
+      { id },
+      { $set: updates }
+    )
+    
+    console.log(`Updated application ${id}`)
+  } catch (error) {
+    console.error('Error updating application in MongoDB:', error)
+    throw error
+  }
+}
+
+export async function deleteApplication(id: string) {
+  try {
+    const client = await clientPromise
+    const db = client.db('fxg_applications')
+    
+    await db.collection('applications').deleteOne({ id })
+    console.log(`Deleted application ${id}`)
+  } catch (error) {
+    console.error('Error deleting application from MongoDB:', error)
+    throw error
   }
 }

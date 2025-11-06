@@ -1,16 +1,12 @@
 import { NextResponse } from 'next/server'
 import { v4 as uuidv4 } from 'uuid'
-import { readDatabase, writeDatabase } from '@/lib/storage'
+import { addApplication } from '@/lib/storage'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
     
-    console.log('Received helper application data:', body)
-    
-    const db = await readDatabase()
-    
-    console.log('Current database state:', db)
+    console.log('Received helper application:', body)
     
     const application = {
       id: uuidv4(),
@@ -20,13 +16,7 @@ export async function POST(request: Request) {
       updatedAt: new Date().toISOString(),
     }
     
-    console.log('New helper application:', application)
-    
-    db.applications.push(application)
-    
-    console.log('Database after push:', db)
-    
-    await writeDatabase(db)
+    await addApplication(application)
     
     console.log('Helper application saved successfully')
     
