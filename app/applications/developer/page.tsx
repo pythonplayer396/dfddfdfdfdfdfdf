@@ -7,15 +7,34 @@ import Link from 'next/link'
 export default function DeveloperApplicationPage() {
   const [submitted, setSubmitted] = useState(false)
   const [formData, setFormData] = useState({
+    // Basic Info
     discordUsername: '',
-    discordId: '',
-    programmingExperience: '',
-    languages: '',
-    frameworks: '',
-    portfolio: '',
-    github: '',
-    reason: '',
-    contactInfo: '',
+    minecraftUsername: '',
+    age: '',
+    portfolioLink: '',
+    
+    // Experience & Skills
+    developerExperience: '',
+    languagesFrameworks: '',
+    previousProjects: '',
+    botsPluginsMods: '',
+    versionControl: '',
+    
+    // Motivation & Availability
+    whyDeveloper: '',
+    hoursPerWeek: '',
+    handleDeadlines: '',
+    
+    // Personal Info / Fit
+    aboutYourself: '',
+    teamworkConflicts: '',
+    strengthsWeaknesses: '',
+    priorModeration: '',
+    followGuidelines: '',
+    
+    // Optional / Fun
+    favoriteProject: '',
+    serverIdeas: '',
     additionalInfo: '',
   })
 
@@ -87,10 +106,14 @@ export default function DeveloperApplicationPage() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="bg-discord-dark border border-white/10 rounded-lg p-8 space-y-6">
+        <form onSubmit={handleSubmit} className="bg-discord-dark border border-white/10 rounded-lg p-8 space-y-8">
+          {/* Basic Info Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-discord-blurple border-b border-white/10 pb-2">Basic Info</h2>
+            
             <div>
               <label htmlFor="discordUsername" className="block text-sm font-semibold mb-2">
-                Discord Username <span className="text-red-500">*</span>
+                1. Discord Username (with tag, e.g., User#1234) <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -99,140 +122,319 @@ export default function DeveloperApplicationPage() {
                 required
                 value={formData.discordUsername}
                 onChange={handleChange}
-                placeholder="username#0000"
+                placeholder="username#1234"
                 className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="discordId" className="block text-sm font-semibold mb-2">
-                Discord User ID <span className="text-red-500">*</span>
+              <label htmlFor="minecraftUsername" className="block text-sm font-semibold mb-2">
+                2. Minecraft Username (if applicable)
               </label>
               <input
                 type="text"
-                id="discordId"
-                name="discordId"
-                required
-                value={formData.discordId}
+                id="minecraftUsername"
+                name="minecraftUsername"
+                value={formData.minecraftUsername}
                 onChange={handleChange}
-                placeholder="123456789012345678"
+                placeholder="Your Minecraft username"
                 className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="programmingExperience" className="block text-sm font-semibold mb-2">
-                Programming Experience <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                id="programmingExperience"
-                name="programmingExperience"
-                required
-                value={formData.programmingExperience}
-                onChange={handleChange}
-                rows={4}
-                placeholder="How long have you been programming? What projects have you worked on?"
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="languages" className="block text-sm font-semibold mb-2">
-                Programming Languages <span className="text-red-500">*</span>
+              <label htmlFor="age" className="block text-sm font-semibold mb-2">
+                3. Age (must be 14 or above) <span className="text-red-500">*</span>
               </label>
               <input
-                type="text"
-                id="languages"
-                name="languages"
+                type="number"
+                id="age"
+                name="age"
                 required
-                value={formData.languages}
+                min="14"
+                value={formData.age}
                 onChange={handleChange}
-                placeholder="JavaScript, Python, TypeScript, etc."
+                placeholder="18"
                 className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="frameworks" className="block text-sm font-semibold mb-2">
-                Frameworks & Technologies <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                id="frameworks"
-                name="frameworks"
-                required
-                value={formData.frameworks}
-                onChange={handleChange}
-                placeholder="React, Node.js, Next.js, Discord.js, etc."
-                className="input-field"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="github" className="block text-sm font-semibold mb-2">
-                GitHub Profile
+              <label htmlFor="portfolioLink" className="block text-sm font-semibold mb-2">
+                4. GitHub / GitLab / Portfolio link <span className="text-red-500">*</span>
               </label>
               <input
                 type="url"
-                id="github"
-                name="github"
-                value={formData.github}
+                id="portfolioLink"
+                name="portfolioLink"
+                required
+                value={formData.portfolioLink}
                 onChange={handleChange}
-                placeholder="https://github.com/yourusername"
+                placeholder="https://github.com/yourusername or your portfolio URL"
                 className="input-field"
               />
             </div>
+          </div>
 
+          {/* Experience & Skills Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-discord-blurple border-b border-white/10 pb-2">Experience & Skills</h2>
+            
             <div>
-              <label htmlFor="portfolio" className="block text-sm font-semibold mb-2">
-                Portfolio / Previous Projects <span className="text-red-500">*</span>
+              <label htmlFor="developerExperience" className="block text-sm font-semibold mb-2">
+                5. What is your experience as a developer? <span className="text-red-500">*</span>
               </label>
               <textarea
-                id="portfolio"
-                name="portfolio"
+                id="developerExperience"
+                name="developerExperience"
                 required
-                value={formData.portfolio}
+                value={formData.developerExperience}
                 onChange={handleChange}
                 rows={4}
-                placeholder="Share links to your projects, websites, or describe your best work..."
+                placeholder="Describe your development experience, how long you've been coding, etc."
                 className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="reason" className="block text-sm font-semibold mb-2">
-                Why do you want to join our dev team? <span className="text-red-500">*</span>
+              <label htmlFor="languagesFrameworks" className="block text-sm font-semibold mb-2">
+                6. What programming languages and frameworks are you comfortable with? <span className="text-red-500">*</span>
               </label>
               <textarea
-                id="reason"
-                name="reason"
+                id="languagesFrameworks"
+                name="languagesFrameworks"
                 required
-                value={formData.reason}
+                value={formData.languagesFrameworks}
                 onChange={handleChange}
-                rows={4}
-                placeholder="What motivates you to contribute to our community?"
+                rows={3}
+                placeholder="e.g., JavaScript, Python, React, Node.js, Discord.js, etc."
                 className="input-field"
               />
             </div>
 
             <div>
-              <label htmlFor="contactInfo" className="block text-sm font-semibold mb-2">
-                Contact Information
+              <label htmlFor="previousProjects" className="block text-sm font-semibold mb-2">
+                7. Have you worked on any projects before? If yes, describe them. <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="previousProjects"
+                name="previousProjects"
+                required
+                value={formData.previousProjects}
+                onChange={handleChange}
+                rows={4}
+                placeholder="Describe your previous projects, what you built, technologies used, etc."
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="botsPluginsMods" className="block text-sm font-semibold mb-2">
+                8. Do you have experience with bots, plugins, or mods? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="botsPluginsMods"
+                name="botsPluginsMods"
+                required
+                value={formData.botsPluginsMods}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Describe your experience with Discord bots, Minecraft plugins, mods, etc."
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="versionControl" className="block text-sm font-semibold mb-2">
+                9. Are you familiar with version control systems like Git? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="versionControl"
+                name="versionControl"
+                required
+                value={formData.versionControl}
+                onChange={handleChange}
+                rows={2}
+                placeholder="Describe your experience with Git, GitHub, GitLab, etc."
+                className="input-field"
+              />
+            </div>
+          </div>
+
+          {/* Motivation & Availability Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-discord-blurple border-b border-white/10 pb-2">Motivation & Availability</h2>
+            
+            <div>
+              <label htmlFor="whyDeveloper" className="block text-sm font-semibold mb-2">
+                10. Why do you want to be a developer in our server? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="whyDeveloper"
+                name="whyDeveloper"
+                required
+                value={formData.whyDeveloper}
+                onChange={handleChange}
+                rows={4}
+                placeholder="What motivates you to join our development team?"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="hoursPerWeek" className="block text-sm font-semibold mb-2">
+                11. How many hours per week can you dedicate? <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
-                id="contactInfo"
-                name="contactInfo"
-                value={formData.contactInfo}
+                id="hoursPerWeek"
+                name="hoursPerWeek"
+                required
+                value={formData.hoursPerWeek}
                 onChange={handleChange}
-                placeholder="Email or other contact method"
+                placeholder="e.g., 10-15 hours per week"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="handleDeadlines" className="block text-sm font-semibold mb-2">
+                12. How do you handle deadlines or stressful situations? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="handleDeadlines"
+                name="handleDeadlines"
+                required
+                value={formData.handleDeadlines}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Describe your approach to managing stress and meeting deadlines"
+                className="input-field"
+              />
+            </div>
+          </div>
+
+          {/* Personal Info / Fit Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-discord-blurple border-b border-white/10 pb-2">Personal Info / Fit</h2>
+            
+            <div>
+              <label htmlFor="aboutYourself" className="block text-sm font-semibold mb-2">
+                13. Tell us about yourself. <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="aboutYourself"
+                name="aboutYourself"
+                required
+                value={formData.aboutYourself}
+                onChange={handleChange}
+                rows={4}
+                placeholder="Share a bit about who you are, your interests, background, etc."
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="teamworkConflicts" className="block text-sm font-semibold mb-2">
+                14. How do you handle teamwork or conflicts in a group? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="teamworkConflicts"
+                name="teamworkConflicts"
+                required
+                value={formData.teamworkConflicts}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Describe your approach to collaboration and conflict resolution"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="strengthsWeaknesses" className="block text-sm font-semibold mb-2">
+                15. What are your strengths and weaknesses? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="strengthsWeaknesses"
+                name="strengthsWeaknesses"
+                required
+                value={formData.strengthsWeaknesses}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Be honest about your strengths and areas for improvement"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="priorModeration" className="block text-sm font-semibold mb-2">
+                16. Do you have any prior experience in server moderation or community management?
+              </label>
+              <textarea
+                id="priorModeration"
+                name="priorModeration"
+                value={formData.priorModeration}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Describe any moderation or community management experience"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="followGuidelines" className="block text-sm font-semibold mb-2">
+                17. Are you comfortable following server rules and coding guidelines? <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="followGuidelines"
+                name="followGuidelines"
+                required
+                value={formData.followGuidelines}
+                onChange={handleChange}
+                rows={2}
+                placeholder="Yes/No and explain your approach to following guidelines"
+                className="input-field"
+              />
+            </div>
+          </div>
+
+          {/* Optional / Fun Questions Section */}
+          <div className="space-y-6">
+            <h2 className="text-xl font-bold text-discord-blurple border-b border-white/10 pb-2">Optional / Fun Questions</h2>
+            
+            <div>
+              <label htmlFor="favoriteProject" className="block text-sm font-semibold mb-2">
+                18. What's your favorite project or thing you've coded so far?
+              </label>
+              <textarea
+                id="favoriteProject"
+                name="favoriteProject"
+                value={formData.favoriteProject}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Tell us about your favorite coding project"
+                className="input-field"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="serverIdeas" className="block text-sm font-semibold mb-2">
+                19. Do you have any ideas you'd like to implement in our server?
+              </label>
+              <textarea
+                id="serverIdeas"
+                name="serverIdeas"
+                value={formData.serverIdeas}
+                onChange={handleChange}
+                rows={3}
+                placeholder="Share any ideas or features you'd like to build"
                 className="input-field"
               />
             </div>
 
             <div>
               <label htmlFor="additionalInfo" className="block text-sm font-semibold mb-2">
-                Additional Information
+                20. Anything else you want us to know about you?
               </label>
               <textarea
                 id="additionalInfo"
@@ -240,16 +442,17 @@ export default function DeveloperApplicationPage() {
                 value={formData.additionalInfo}
                 onChange={handleChange}
                 rows={3}
-                placeholder="Anything else you'd like us to know?"
+                placeholder="Any additional information you'd like to share"
                 className="input-field"
               />
             </div>
+          </div>
 
-            <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
-              <Send className="w-5 h-5" />
-              Submit Application
-            </button>
-          </form>
+          <button type="submit" className="btn-primary w-full flex items-center justify-center gap-2">
+            <Send className="w-5 h-5" />
+            Submit Application
+          </button>
+        </form>
       </div>
     </div>
   )

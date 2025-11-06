@@ -6,15 +6,15 @@ import Link from 'next/link'
 export default function ApplicationsPage() {
   const applications = [
     {
-      title: 'Helper Application',
-      description: 'Join our team as a community helper and support our members',
+      title: 'Staff Application',
+      description: 'Join our team as a staff member and support our community',
       icon: <Users className="w-12 h-12" />,
       color: 'from-discord-green to-emerald-600',
       href: '/applications/helper',
       requirements: [
         'Active Discord user',
         'Good communication skills',
-        'Patient and friendly',
+        'Familiar with server rules',
         'Available regularly',
       ],
     },
