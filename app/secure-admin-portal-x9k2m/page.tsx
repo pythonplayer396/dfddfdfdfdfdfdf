@@ -147,13 +147,34 @@ export default function AdminDashboard() {
   }
 
   const exportToJSON = () => {
-    const dataStr = JSON.stringify(applications, null, 2)
+    const dataToExport = activeTab === 'all' ? applications : filtered
+    const dataStr = JSON.stringify(dataToExport, null, 2)
     const blob = new Blob([dataStr], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const link = document.createElement('a')
     link.href = url
-    link.download = `applications-${Date.now()}.json`
+    link.download = `applications-${activeTab}-${Date.now()}.json`
     link.click()
+    showSuccess(`Exported ${dataToExport.length} applications`)
+  }
+
+  const exportToCSV = () => {
+    const dataToExport = activeTab === 'all' ? applications : filtered
+    if (dataToExport.length === 0) return
+
+    const headers = Object.keys(dataToExport[0]).join(',')
+    const rows = dataToExport.map(app => 
+      Object.values(app).map(val => `"${val}"`).join(',')
+    )
+    const csv = [headers, ...rows].join('\n')
+    
+    const blob = new Blob([csv], { type: 'text/csv' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `applications-${activeTab}-${Date.now()}.csv`
+    link.click()
+    showSuccess(`Exported ${dataToExport.length} applications to CSV`)
   }
 
   if (!isAuthenticated) {
@@ -253,47 +274,60 @@ export default function AdminDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-          <div className="bg-discord-dark border border-white/10 rounded-lg p-4">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'all' ? 'border-white/40 ring-2 ring-white/20' : 'border-white/10'
+            }`}
+          >
             <p className="text-gray-400 text-sm mb-1">Total</p>
             <p className="text-3xl font-bold">{stats.total}</p>
-          </div>
-          <div className="bg-discord-dark border border-yellow-500/20 rounded-lg p-4">
+          </button>
+          <button
+            onClick={() => setActiveTab('pending')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'pending' ? 'border-yellow-500/60 ring-2 ring-yellow-500/30' : 'border-yellow-500/20'
+            }`}
+          >
             <p className="text-yellow-500 text-sm mb-1">Pending</p>
             <p className="text-3xl font-bold text-yellow-500">{stats.pending}</p>
-          </div>
-          <div className="bg-discord-dark border border-blue-500/20 rounded-lg p-4">
+          </button>
+          <button
+            onClick={() => setActiveTab('interview')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'interview' ? 'border-blue-500/60 ring-2 ring-blue-500/30' : 'border-blue-500/20'
+            }`}
+          >
             <p className="text-blue-500 text-sm mb-1">Interview</p>
             <p className="text-3xl font-bold text-blue-500">{stats.interview}</p>
-          </div>
-          <div className="bg-discord-dark border border-green-500/20 rounded-lg p-4">
+          </button>
+          <button
+            onClick={() => setActiveTab('approved')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'approved' ? 'border-green-500/60 ring-2 ring-green-500/30' : 'border-green-500/20'
+            }`}
+          >
             <p className="text-green-500 text-sm mb-1">Approved</p>
             <p className="text-3xl font-bold text-green-500">{stats.approved}</p>
-          </div>
-          <div className="bg-discord-dark border border-red-500/20 rounded-lg p-4">
+          </button>
+          <button
+            onClick={() => setActiveTab('denied')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'denied' ? 'border-red-500/60 ring-2 ring-red-500/30' : 'border-red-500/20'
+            }`}
+          >
             <p className="text-red-500 text-sm mb-1">Denied</p>
             <p className="text-3xl font-bold text-red-500">{stats.denied}</p>
-          </div>
-          <div className="bg-discord-dark border border-orange-500/20 rounded-lg p-4">
+          </button>
+          <button
+            onClick={() => setActiveTab('interview_failed')}
+            className={`bg-discord-dark border rounded-lg p-4 text-left transition-all hover:scale-105 ${
+              activeTab === 'interview_failed' ? 'border-orange-500/60 ring-2 ring-orange-500/30' : 'border-orange-500/20'
+            }`}
+          >
             <p className="text-orange-500 text-sm mb-1">Interview Failed</p>
             <p className="text-3xl font-bold text-orange-500">{stats.interviewFailed}</p>
-          </div>
-        </div>
-
-        {/* Tabs */}
-        <div className="flex gap-2 mb-6 overflow-x-auto">
-          {(['all', 'pending', 'interview', 'approved', 'denied', 'interview_failed'] as const).map(tab => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap transition-colors ${
-                activeTab === tab
-                  ? 'bg-discord-blurple text-white'
-                  : 'bg-discord-dark text-gray-400 hover:text-white'
-              }`}
-            >
-              {tab.replace('_', ' ').toUpperCase()}
-            </button>
-          ))}
+          </button>
         </div>
 
         <div className="glass-card mb-6">
@@ -308,10 +342,20 @@ export default function AdminDashboard() {
                 className="input-field pl-10"
               />
             </div>
-            <button onClick={exportToJSON} className="btn-primary flex items-center gap-2">
-              <Download className="w-5 h-5" />
-              Export JSON
-            </button>
+            <div className="flex gap-2">
+              <button onClick={exportToJSON} className="btn-primary flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                JSON
+              </button>
+              <button onClick={exportToCSV} className="btn-secondary flex items-center gap-2">
+                <Download className="w-5 h-5" />
+                CSV
+              </button>
+            </div>
+          </div>
+          <div className="flex items-center justify-between text-sm text-gray-400 mt-4">
+            <p>Showing {filtered.length} of {applications.length} applications</p>
+            <p>Filter: <span className="text-white font-semibold capitalize">{activeTab.replace('_', ' ')}</span></p>
           </div>
         </div>
 
