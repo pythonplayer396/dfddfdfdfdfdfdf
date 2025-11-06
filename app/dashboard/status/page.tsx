@@ -13,7 +13,7 @@ interface Application {
   submittedAt: string
   updatedAt: string
 }
-
+// FDFD
 export default function ApplicationStatus() {
   const { data: session, status } = useSession()
   const router = useRouter()
