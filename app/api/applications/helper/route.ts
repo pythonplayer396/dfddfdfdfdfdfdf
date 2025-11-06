@@ -20,7 +20,12 @@ async function writeDatabase(data: any) {
 export async function POST(request: Request) {
   try {
     const body = await request.json()
+    
+    console.log('Received helper application data:', body)
+    
     const db = await readDatabase()
+    
+    console.log('Current database state:', db)
     
     const application = {
       id: uuidv4(),
@@ -30,14 +35,21 @@ export async function POST(request: Request) {
       updatedAt: new Date().toISOString(),
     }
     
+    console.log('New helper application:', application)
+    
     db.applications.push(application)
+    
+    console.log('Database after push:', db)
+    
     await writeDatabase(db)
+    
+    console.log('Helper application saved successfully')
     
     return NextResponse.json({ success: true, id: application.id })
   } catch (error) {
-    console.error('Error saving application:', error)
+    console.error('Error saving helper application:', error)
     return NextResponse.json(
-      { success: false, error: 'Failed to save application' },
+      { success: false, error: error instanceof Error ? error.message : 'Failed to save application' },
       { status: 500 }
     )
   }
